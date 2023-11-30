@@ -83,8 +83,7 @@ class Ligand:
                 f"Measured observable should be any of: dg, ki, ic50 or pic50."
             )
 
-        self._data = self._data.append(
-            pd.Series(
+        new_series = pd.Series(
                 [
                     derived_type,
                     utils.convert_value(
@@ -111,7 +110,7 @@ class Ligand:
                     ]
                 ),
             )
-        )
+        self._data = pd.concat([self._data, new_series])
 
     def get_name(self):
         """

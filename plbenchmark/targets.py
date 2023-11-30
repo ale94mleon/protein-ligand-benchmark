@@ -13,13 +13,13 @@ import networkx as nx
 from . import __path__, ligands, edges, utils
 
 
-data_path = os.path.abspath(os.path.join(os.path.join(__path__[0], "sample_data")))
+data_path = os.path.abspath(os.path.join(os.path.join(__path__[0], "data")))
 file = open(os.path.join(data_path, "targets.yml"))
 target_dict = yaml.full_load(file)
 file.close()
 
 
-def set_data_dir(path=os.path.abspath(os.path.join(__path__[0], "sample_data"))):
+def set_data_dir(path=os.path.abspath(os.path.join(__path__[0], "data"))):
     """
     Gets the directory name of the target
 
@@ -43,7 +43,7 @@ def get_target_dir(target):
     if target in target_dict:
         return target_dict[target]["dir"]
     else:
-        raise ValueError(f"Directory for target {target} not found.")
+        raise ValueError(f"Directory for target {target} not found. Choose from {target_dict.keys()}")
 
 
 def get_target_data_path(target):
@@ -57,7 +57,7 @@ def get_target_data_path(target):
     if target in target_dict:
         return os.path.join(data_path, target_dict[target]["dir"], "00_data", "")
     else:
-        raise ValueError(f"Path for target {target} not found.")
+        raise ValueError(f"Path for target {target} not found. Choose from {target_dict.keys()}")
 
 
 class Target:

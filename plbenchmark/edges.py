@@ -101,8 +101,9 @@ class EdgeSet(dict):
         target_path = targets.get_target_data_path(target)
         ligand_set = ligands.LigandSet(target)
         file = open(os.path.join(target_path, "edges.yml"))
-        data = yaml.full_load(file)
+        data = yaml.full_load(file)['edges']
         for name, d in data.items():
+            d['name'] = name
             edg = Edge(d)
             edg.add_ligand_data(ligand_set)
             self[name] = edg

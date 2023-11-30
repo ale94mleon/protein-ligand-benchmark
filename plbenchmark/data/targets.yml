@@ -1,15 +1,15 @@
-bace:
-  date: 2020-02-04
-  dir: bace
-  name: bace
-bace_hunt:
-  date: 2020-02-05
-  dir: bace_hunt
-  name: bace_hunt
-bace_p2:
-  date: 2020-02-06
-  dir: bace_p2
-  name: bace_p2
+# bace:
+#   date: 2020-02-04
+#   dir: bace
+#   name: bace
+# bace_hunt:
+#   date: 2020-02-05
+#   dir: bace_hunt
+#   name: bace_hunt
+# bace_p2:
+#   date: 2020-02-06
+#   dir: bace_p2
+#   name: bace_p2
 cdk2:
   date: 2019-12-13
   dir: cdk2
@@ -26,18 +26,18 @@ eg5:
   date: 2020-06-19
   dir: eg5
   name: eg5
-galectin:
-  date: 2019-12-13
-  dir: galectin
-  name: galectin
+# galectin:
+#   date: 2019-12-13
+#   dir: galectin
+#   name: galectin
 hif2a:
   date: 2020-07-03
   dir: hif2a
   name: hif2a
-jnk1:
-  date: 2019-09-23
-  dir: jnk1
-  name: jnk1
+# jnk1:
+#   date: 2019-09-23
+#   dir: jnk1
+#   name: jnk1
 mcl1:
   date: 2019-12-13
   dir: mcl1
@@ -46,10 +46,10 @@ p38:
   date: 2019-12-09
   dir: p38
   name: p38
-pde10:
-  date: 2020-07-10
-  dir: pde10
-  name: pde10
+# pde10:
+#   date: 2020-07-10
+#   dir: pde10
+#   name: pde10
 pde2:
   date: 2019-09-23
   dir: pde2
