@@ -143,7 +143,7 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
                 return 0.0 * out_unit
             else:
                 result = (
-                    -unit.molar_gas_constant
+                    unit.molar_gas_constant
                     * temperature
                     * unit.kelvin
                     * np.log(value / unit.molar)
