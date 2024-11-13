@@ -87,8 +87,8 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
     Converts an experimental value into another derived quantity with specified unit.
 
     :param value: float, numerical value
-    :param original_type: string, code for the original observable. Can be `dg`, `ki`, `ic50`, `pic50`
-    :param final_type: string, code for the desired derived quantity. Can be `dg`, `ki`, `ic50`, `pic50`
+    :param original_type: string, code for the original observable. Can be `dg`, `ki` ~`ka`, `ic50` ~ `kd`, `pic50`
+    :param final_type: string, code for the desired derived quantity. Can be `dg`, `ki` ~`ka`, `ic50` ~ `kd`, `pic50`
     :param temperature: float, temperature in kelvin
     :param out_unit: unit of type :py:class:`pint`, output unit of final_type, needs to fit to the requested final_type
     :return: :py:class:`pint.Quantity` with desired unit
@@ -98,9 +98,9 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
     if out_unit is None:
         if final_type == "dg":
             out_unit = unit("kilocalories / mole")
-        elif final_type == "ki":
+        elif final_type in ["ki", "ka"]:
             out_unit = unit("nanomolar")
-        elif final_type == "ic50":
+        elif final_type in ["kd", "ic50"]:
             out_unit = unit("nanomolar")
         elif final_type == "pic50":
             out_unit = unit("")
@@ -108,7 +108,7 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
     if original_type == "dg":
         if final_type == "dg":
             return value.to(out_unit)
-        elif final_type == "ki":
+        elif final_type in ["ki", "ka"]:
             result = (
                 np.exp(
                     -value / (unit.molar_gas_constant
@@ -117,7 +117,7 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
                 * unit.molar
             )
             return result.to(out_unit)
-        elif final_type == "ic50":
+        elif final_type in ["ic50", 'kd']:
             result = (
                 np.exp(
                     value / (unit.molar_gas_constant * temperature * unit.kelvin)
@@ -127,7 +127,7 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
             return result.to(out_unit)
         elif final_type == "pic50":
             result = (
-                value
+                - value
                 / (unit.molar_gas_constant * temperature * unit.kelvin)
                 / np.log(10)
             )
@@ -137,34 +137,34 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
                 f"Conversion to observable {final_type} not possible. "
                 f"Observable must be any of: dg, ki, ic50 or pic50."
             )
-    elif original_type == "ki":
+    elif original_type in ["ki", "ka"]:
         if final_type == "dg":
             if value < 1e-15 * unit("molar"):
                 return 0.0 * out_unit
             else:
-                result = (
+                result = -(
                     unit.molar_gas_constant
                     * temperature
                     * unit.kelvin
                     * np.log(value / unit.molar)
                 )
                 return result.to(out_unit).round(2)
-        elif final_type == "ki":
+        elif final_type in ["ki", "ka"]:
             return value.to(out_unit)
-        elif final_type == "ic50":
-            return value.to(out_unit)
+        elif final_type in ["ic50", 'kd']:
+            return (1/value).to(out_unit)
         elif final_type == "pic50":
             if value < 1e-15 * unit("molar"):
                 return -1e15 * out_unit
             else:
-                result = -np.log(value / unit.molar) / np.log(10)
+                result = np.log(value / unit.molar) / np.log(10)
                 return result
         else:
             raise NotImplementedError(
                 f"Conversion to observable {final_type} not possible. "
                 f"Observable must be any of: dg, ki, ic50 or pic50."
             )
-    elif original_type == "ic50":
+    elif original_type in ["ic50", "kd"]:
         if final_type == "dg":
             if value < 1e-15 * unit("molar"):
                 return 0.0 * out_unit
@@ -176,10 +176,10 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
                     * np.log(value.to("molar") / unit.molar)
                 )
                 return result.to(out_unit).round(2)
-        elif final_type == "ki":
+        elif final_type in ["ic50", "kd"]:
             return value.to(out_unit)
-        elif final_type == "ic50":
-            return value.to(out_unit)
+        elif final_type in ["ki", "ka"]:
+            return (1/value).to(out_unit)
         elif final_type == "pic50":
             if value.to("molar") < 1e-15 * unit("molar"):
                 return -1e15 * out_unit
@@ -201,10 +201,10 @@ def convert_value(value, original_type, final_type, temperature=300.0, out_unit=
                 * np.log(10)
             )
             return result.to(out_unit).round(2)
-        elif final_type == "ki":
-            result = 10 ** (-value) * unit("molar")
+        elif final_type in ["ki", "ka"]:
+            result = 10 ** (value) * unit("molar")
             return result.to(out_unit)
-        elif final_type == "ic50":
+        elif final_type in ["ic50", "kd"]:
             result = 10 ** (-value) * unit("molar")
             return result.to(out_unit)
         elif final_type == "pic50":
@@ -235,9 +235,9 @@ def convert_error(
     if out_unit is None:
         if final_type == "dg":
             out_unit = unit("kilocalories / mole")
-        elif final_type == "ki":
+        elif final_type in ["ki", "ka"]:
             out_unit = unit("nanomolar")
-        elif final_type == "ic50":
+        elif final_type in ["ic50", "kd"]:
             out_unit = unit("nanomolar")
         elif final_type == "pic50":
             out_unit = unit("")
@@ -245,62 +245,66 @@ def convert_error(
     if original_type == "dg":
         if final_type == "dg":
             return error_value.to(out_unit)
-        elif final_type == "ki":
+        elif final_type in ["ki", "ka"]:
             # e_ki^2 = (del K/del dG)^2 * e_dG^2
             # e_ki   = 1/RT * exp(-dG/RT) * e_dG
             k_bt = unit.molar_gas_constant * temperature * unit.kelvin
             error = (
-                1.0 / k_bt * np.exp(-value / k_bt) * error_value * unit.molar
+                - 1.0 / k_bt * np.exp(-value / k_bt) * error_value * unit.molar
             )
             return error.to(out_unit)
-        elif final_type == "ic50":
+        elif final_type in ["ic50", "kd"]:
             k_bt = unit.molar_gas_constant * temperature * unit.kelvin
             error = (
-                1.0 / k_bt * np.exp(-value / k_bt) * error_value * unit.molar
+                1.0 / k_bt * np.exp(value / k_bt) * error_value * unit.molar
             )
             return error.to(out_unit)
         elif final_type == "pic50":
             # e_pic50^2 = (del pic50/del dG)^2 * e_dG^2
             # e_pic50   = 1/(RT*ln(10)) * e_dG
             k_bt = unit.molar_gas_constant * temperature * unit.kelvin
-            error = 1.0 / (k_bt * np.log(10)) * error_value
+            error = - 1.0 / (k_bt * np.log(10)) * error_value
             return error.to(out_unit)
         else:
             raise NotImplementedError(
                 f"Conversion to observable {final_type} not possible. "
-                f"Observable must be any of: dg, ki, ic50 or pic50."
+                f"Observable must be any of: dg, ki, kd, ic50 or pic50."
             )
-    elif original_type == "ki":
+    elif original_type in ["ki", "ka"]:
         if final_type == "dg":
             if value < 1e-15 * unit.molar:
                 return 0.0 * out_unit
             else:
                 error = (
-                    unit.molar_gas_constant
+                    -1 * unit.molar_gas_constant
                     * temperature
                     * unit.kelvin
                     / value
                     * error_value
                 )
                 return error.to(out_unit).round(2)
-        elif final_type == "ki":
+        elif final_type in ["ki", "ka"]:
             return error_value.to(out_unit)
-        elif final_type == "ic50":
-            return error_value.to(out_unit)
+        elif final_type in ["ic50", 'kd']:
+            error = (
+                - (1/value)**2
+                * error_value
+            )
+            return error.to(out_unit)
         elif final_type == "pic50":
             # e_pic50^2 = (del pic50/del Ki)^2 * e_Ki^2
             # e_pic50   = 1/(Ki*ln(10)) * e_Ki
             if (value * np.log(10)) < 1e-15 * unit("molar"):
                 return 1e15 * out_unit
             else:
-                result = 1 / (value * np.log(10)) * error_value
+                result = 1 / value * error_value
                 return result.to(out_unit).round(2)
         else:
             raise NotImplementedError(
                 f"Conversion to observable {final_type} not possible. "
                 f"Observable must be any of: dg, ki, ic50 or pic50."
             )
-    elif original_type == "ic50":
+    elif original_type in ["ic50", "kd"]:
         if final_type == "dg":
             if value < 1e-15 * unit.molar:
                 return 0.0 * out_unit
@@ -313,9 +317,13 @@ def convert_error(
                     * error_value
                 )
                 return error.to(out_unit).round(2)
-        elif final_type == "ki":
-            return error_value.to(out_unit)
-        elif final_type == "ic50":
+        elif final_type in ["ki", "ka"]:
+            error = (
+                - (1/value)**2
+                * error_value
+            )
+            return error.to(out_unit)
+        elif final_type in ["ic50", 'kd']:
             return error_value.to(out_unit)
         elif final_type == "pic50":
             # e_pic50^2 = (del pic50/del IC50)^2 * e_IC50^2
@@ -323,7 +331,7 @@ def convert_error(
             if (value * np.log(10)) < 1e-15 * unit("molar"):
                 return 1e15 * out_unit
             else:
-                result = 1 / (value * np.log(10)) * error_value
+                result = - 1 / (value) * error_value
                 return result.to(out_unit).round(2)
         else:
             raise NotImplementedError(
@@ -333,20 +341,20 @@ def convert_error(
     elif original_type == "pic50":
         if final_type == "dg":
             error = (
-                unit.molar_gas_constant
+                -1 * unit.molar_gas_constant
                 * temperature
                 * unit.kelvin
                 * np.log(10)
                 * error_value
             )
             return error.to(out_unit).round(2)
-        elif final_type == "ki":
+        elif final_type in ["ki", "ka"]:
             # Ki = 10^(-pIC50)
             # dKi^2 = (del Ki / del pIC50)^2 * dpIC50^2
             # dKi = ln(10) * 10^(-pIC50) * dpIC50
-            error = np.log(10) * 10 ** (-value) * error_value * unit("molar")
+            error = np.log(10) * 10 ** (value) * error_value * unit("molar")
             return error.to(out_unit).round(2)
-        elif final_type == "ic50":
+        elif final_type in ["ic50", "kd"]:
             # IC50 = 10^(-pIC50)
             # dIC50^2 = (del IC50 / del pIC50)^2 * dpIC50^2
             # dIC50 = ln(10) * 10^(-pIC50) * dpIC50
@@ -357,5 +365,5 @@ def convert_error(
         else:
             raise NotImplementedError(
                 f"Conversion to observable {final_type} not possible. "
-                f"Observable must be any of: dg, ki, ic50 or pic50."
+                f"Observable must be any of: dg, ki, ka, kd, ic50 or pic50."
             )

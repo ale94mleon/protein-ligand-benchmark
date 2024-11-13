@@ -23,7 +23,7 @@ class Ligand:
 
     """
 
-    _observables = ["dg", "dh", "tds", "ki", "ic50", "pic50"]
+    _observables = ["dg", "dh", "tds", "ki", "ka", "kd", "ic50", "pic50"]
 
     def __init__(self, d: dict, target: str = None):
         """
@@ -51,7 +51,7 @@ class Ligand:
             if original_type not in self._observables:
                 raise ValueError(
                     f"No known measured observable found. "
-                    f"Measured observable should be any of: dg, ki, ic50 or pic50."
+                    f"Measured observable should be any of: dg, ki, ka, kd, ic50 or pic50."
                 )
             # let pint figure out what the unit means
             unit = utils.unit(self._data[("measurement", "unit")])
@@ -71,7 +71,7 @@ class Ligand:
         """
         Derive observables from (stored) primary data, which is then stored in the :py:class:`pandas.DataFrame`
 
-        :param derived_type: type of derived observable, can be any of 'dg' 'ki', 'ic50' or 'pic50'
+        :param derived_type: type of derived observable, can be any of 'dg', 'ki', 'ka', 'kd', 'ic50' or 'pic50'
         :param destination: string with column name for 'pandas.DataFrame' where the derived observable should be stored.
         :param out_unit: unit of type :py:class:`pint` unit of derived coordinate
         :return: None
@@ -80,7 +80,7 @@ class Ligand:
         if original_type not in self._observables:
             raise ValueError(
                 f"No known measured observable found. "
-                f"Measured observable should be any of: dg, ki, ic50 or pic50."
+                f"Measured observable should be any of: dg, ki~ka, kd~ic50 or pic50."
             )
 
         new_series = pd.Series(
