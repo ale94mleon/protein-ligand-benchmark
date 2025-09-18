@@ -10,6 +10,8 @@ import pandas as pd
 import plbenchmark
 from plbenchmark import targets, ligands, edges
 
+targets.set_data_dir(os.path.join(plbenchmark.__path__[0], "sample_data"))
+
 
 def test_targets():
     assert len(targets.target_dict) == 1

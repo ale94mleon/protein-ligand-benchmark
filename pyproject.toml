@@ -37,7 +37,10 @@ keywords = [
 ]
 
 # requires-python = 
-dependencies = []
+dependencies = [
+    "pint==0.21",
+    "numpy<2.0.0"
+]
 
 [project.optional-dependencies]
 dev = ["pytest"]

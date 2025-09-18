@@ -6,7 +6,11 @@ Unit and regression test for the plbenchmark package.
 import pytest
 import numpy as np
 import pandas as pd
-from plbenchmark import edges, ligands
+import os
+from plbenchmark import edges, ligands, targets
+import plbenchmark
+
+targets.set_data_dir(os.path.join(plbenchmark.__path__[0], "sample_data"))
 
 
 def test_edge():

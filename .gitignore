@@ -110,3 +110,5 @@ ENV/
 
 mdout.mdp
 tpr.tpr
+
+src/plbenchmark/_version.py

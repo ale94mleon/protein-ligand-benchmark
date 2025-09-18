@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
     # Base depends
-  - python
+  - python<3.12
   - pip
 
     # Testing
@@ -14,13 +14,14 @@ dependencies:
   - coverage
 
   - pyyaml
-  - numpy
+  - numpy<2.0.0
   - matplotlib
   - pandas
-  - rdkit
+  - rdkit=2023.03.3
   - networkx
   - openff-units
   - scipy
+  - ambertools=23.3
   - openff-toolkit<=0.11
   - requests
   - git-lfs

@@ -12,8 +12,11 @@ from rdkit import Chem, DataStructs
 from rdkit.Chem import rdFMCS
 from openff.toolkit.topology import Molecule
 
-import plbenchmark
 from plbenchmark import ligands, targets, utils
+
+import plbenchmark
+
+targets.set_data_dir(os.path.join(plbenchmark.__path__[0], "sample_data"))
 
 
 def test_affinity_data():
